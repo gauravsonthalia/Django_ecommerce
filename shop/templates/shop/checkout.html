@@ -14,6 +14,7 @@
         <h2> Step 2 - Enter Your Details</h2>
         <form method='post' action='/shop/checkout/'>{% csrf_token %}
             <input type='hidden' name = "itemsJson" id= "itemsJson">
+            <input type='hidden' name = "amount" id= "amount">
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="name">Name</label>
@@ -72,31 +73,41 @@ if (localStorage.getItem('cart') == null) {
 }
 console.log(cart);
 var sum = 0;
-if ($.isEmptyObject(cart)){
-    mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
-                Your Cart is Empty Right Now.
-                </li>`
-    $('#items').append(mystr);  
+var total_bill = 0
+if ($.isEmptyObject(cart)) {
+    //if object is empty
+    mystr = `<p>Your cart is empty, please add some items to your cart before checking out!</p>`
+    $('#items').append(mystr);
+} else {
+    for (item in cart) {
+        let name = cart[item][1];
+        let qty = cart[item][0];
+        let price = cart[item][2] * qty;
+        total_bill += price
+        sum = sum + qty;
+        mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${name}
+                    <span class="badge badge-light">${qty} Item - Rs.${price}</span>
 
-}
-else{
-for (item in cart){
-    let name = cart[item][1];
-    let qty = cart[item][0];   
-    sum = sum + qty;
-    mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
-                ${name}
-                    <span class="badge badge-primary badge-pill">${qty}</span>
                 </li>`
-    $('#items').append(mystr);  
-    }          
+        $('#items').append(mystr);
+    }
+
+
+    total = `<div class="alert alert-success" role="alert"><li class="list-group-item d-flex justify-content-between align-items-center">
+                    <h3>Total Bill</h3>
+                    <h3>  Rs.<span id='totalPrice'>${total_bill}</span>  </h3>
+
+                </li></div>`
+    $('#items').append(total);
 }
-document.getElementById('cart').innerHTML = sum;
+document.getElementById('cart').innerHTML = sum;;
 $('#itemsJson').val(JSON.stringify(cart));
 {% if thank %}
-alert('Thanks for ordering with us. Your order id is {{id}}.')
+alert('Thanks for ordering with us. Your order is is {{id}}. Use it to track your order using our order tracker');
 localStorage.clear();
-document.location = "/shop"
+document.location = "/shop";
 {% endif %}
+$('#amount').val($('#totalPrice').html())
 </script>
 {% endblock js %}
